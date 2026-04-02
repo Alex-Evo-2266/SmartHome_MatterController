@@ -296,3 +296,6 @@ class ControllerNode {
 }
 
 new ControllerNode().start().catch(error => logger.error(error));
+
+
+// node ./dist/matter/baseExample.js --ble --ble-wifi-ssid=ASUS --ble-wifi-credentials=ac47a75c42 --pairingcode=10504501015
