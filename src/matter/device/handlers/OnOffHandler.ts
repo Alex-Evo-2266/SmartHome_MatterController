@@ -7,7 +7,7 @@ import { ICommands } from "./ICommands.js";
 
 export const OnOffHandlerMeta: ClusterHandlerMetaCB = async(nodeId, endpointId) => {
   return{
-    name: `state_${endpointId}`,
+    name: `power_${endpointId}`,
     commands: ["on", "off", "toggle", "set", "get"],
     attributes: ["onOff"],
     nodeId,

@@ -18,9 +18,7 @@ export class MatterDevice {
 
   async execute(command: ICommands) {
     for (const h of this.handlers) {
-        console.log("i0", command)
         if (h.canHandle(command)) {
-            console.log("i1", command)
             return h.execute(command);
         }
     }

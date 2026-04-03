@@ -47,11 +47,9 @@ export class MqttTransport implements ITransport {
           console.warn(`[MQTT] Invalid JSON on topic ${topic}`);
           return;
         }
-        console.log("P(", topic)
         // 🔹 ищем подписку с wildcard
         for (const [sub, cb] of this.subscriptions.entries()) {
           const regex = new RegExp("^" + sub.replace("+", "[^/]+").replace("#", ".+") + "$");
-          console.log("P(", topic, sub)
           if (regex.test(topic)) {
             cb(msg, topic);
           }

@@ -50,7 +50,7 @@ export class MatterMqttBridge {
       await this.transport.publish(`matter/devices/details`, {data: s});
     });
 
-    await this.transport.subscribe("matter/devices/+/info", async (_: any, topic: string) => {
+    await this.transport.subscribe("matter/devices/+/getInfo", async (_: any, topic: string) => {
       const match = topic.match(/matter\/devices\/(\d+)\/info/);
       if (!match) return;
 
