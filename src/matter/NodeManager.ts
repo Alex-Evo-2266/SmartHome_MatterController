@@ -134,6 +134,7 @@ export class NodeManager {
         if (client) {
           deviceInfo.clusters.push({
             clusterName: reg.cluster.name,
+            type: meta.type,
             name: meta.name,
             Commands: meta.commands,
             attributes: meta.attributes,

@@ -10,6 +10,7 @@ export const OnOffHandlerMeta: ClusterHandlerMetaCB = async(nodeId, endpointId) 
     name: `power_${endpointId}`,
     commands: ["on", "off", "toggle", "set", "get"],
     attributes: ["onOff"],
+    type: "binary",
     nodeId,
     endpointId
   }

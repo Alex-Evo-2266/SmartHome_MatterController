@@ -51,7 +51,7 @@ export class MatterMqttBridge {
     });
 
     await this.transport.subscribe("matter/devices/+/getInfo", async (_: any, topic: string) => {
-      const match = topic.match(/matter\/devices\/(\d+)\/info/);
+      const match = topic.match(/matter\/devices\/(\d+)\/getInfo/);
       if (!match) return;
 
       const nodeId = BigInt(match[1]);

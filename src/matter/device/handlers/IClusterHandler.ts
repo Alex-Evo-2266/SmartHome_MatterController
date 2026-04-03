@@ -15,6 +15,7 @@ export interface IClusterHandler {
 
 export interface ClusterHandlerMeta {
   name: string;
+  type: string;
   commands: string[];
   attributes: string[];
   min?: number;

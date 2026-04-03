@@ -15,6 +15,7 @@ export const LevelControlHandlerMeta: ClusterHandlerMetaCB = async (nodeId, endp
         attributes: ["currentLevel"],
         max,
         min,
+        type: "number",
         nodeId,
         endpointId
     }

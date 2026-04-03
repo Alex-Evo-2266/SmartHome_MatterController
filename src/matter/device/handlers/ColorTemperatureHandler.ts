@@ -17,6 +17,7 @@ export const ColorControlHandlerMeta: ClusterHandlerMetaCB = async (nodeId, endp
     attributes: ["currentTemp"],
     max: maxK,
     min: minK,
+    type: "number",
     nodeId,
     endpointId
   }
