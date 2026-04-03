@@ -9,6 +9,7 @@ export async function createDevice(nodeId: bigint, device: any, publish: Functio
 
   for (const reg of ClusterRegistry) {
     const client = device.getClusterClient(reg.cluster);
+    const meta = await reg.meta(nodeId, device.number, client)
 
     if (client) {
       handlers.push(

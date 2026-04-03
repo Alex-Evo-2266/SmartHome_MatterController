@@ -1,7 +1,8 @@
 // src/matter/device/handlers/IClusterHandler.ts
 
 export interface IClusterHandler {
-  name: string;
+
+  meta: ClusterHandlerMeta
 
   init(): Promise<void>;
 

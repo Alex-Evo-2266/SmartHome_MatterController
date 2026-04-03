@@ -6,7 +6,6 @@ import { ClusterHandlerMeta, ClusterHandlerMetaCB, IClusterHandler } from "./ICl
 import { ICommands } from "./ICommands.js";
 
 export const OnOffHandlerMeta: ClusterHandlerMetaCB = async(nodeId, endpointId) => {
-  console.log("u0",nodeId, endpointId)
   return{
     name: `state_${endpointId}`,
     commands: ["on", "off", "toggle", "set", "get"],
@@ -17,68 +16,75 @@ export const OnOffHandlerMeta: ClusterHandlerMetaCB = async(nodeId, endpointId) 
 }
 
 export class OnOffHandler implements IClusterHandler {
-  name = "onOff";
+  private currentState: boolean = false;
+  public meta: ClusterHandlerMeta;
 
   constructor(
     private client: ClusterClientObj<OnOff.Complete>,
     private publish: Function,
     private publishState: Function,
-    private meta: ClusterHandlerMeta
-  ) {}
+    meta: ClusterHandlerMeta,
+  ) {
+    this.meta = meta
+  }
 
   async init() {
     const state = await this.client.getOnOffAttribute();
+    this.currentState = state
 
     this.publishState()
 
 
-    this.client.addOnOffAttributeListener((value) => {
-        this.publishState()
+    this.client.addOnOffAttributeListener(async(value) => {
+      this.currentState = value
+      this.publishState()
     });
   }
 
   async getState(){
-    const state = await this.client.getOnOffAttribute();
-    return {[this.meta.name]: state}
+    return {[this.meta.name]: this.currentState}
   }
 
   canHandle(cmd: ICommands) {
-    console.log(cmd.type, this.meta.name)
-    return cmd.type === this.meta.name
-    // return cmd.type === this.name;
+    return cmd.name === this.meta.name
   }
 
   async execute(cmd: ICommands) {
-    if (cmd.action === "toggle"){
-      await this.client.toggle();
-      return
-    } 
-    if (cmd.action === "on") {
-      await this.client.on();
-      return
-    } 
-    if (cmd.action === "off") {
-      await this.client.off();
-      return
-    } 
-    if (cmd.action === "set"){
-      const curstate = await this.client.getOnOffAttribute();
-      if(!curstate && (cmd.value === "true" || cmd.value === true || cmd.value === 1 || cmd.value === "1"))
-      {
+    try{
+      if (cmd.action === "toggle"){
+        await this.client.toggle();
+        return
+      } 
+      if (cmd.action === "on") {
         await this.client.on();
-      }
-      if(curstate && (cmd.value === "false" || cmd.value === false || cmd.value === 0 || cmd.value === "0"))
-      {
+        return
+      } 
+      if (cmd.action === "off") {
         await this.client.off();
+        return
+      } 
+      if (cmd.action === "set"){
+        const curstate = await this.client.getOnOffAttribute();
+        if(!curstate && (cmd.value === "true" || cmd.value === true || cmd.value === 1 || cmd.value === "1"))
+        {
+          await this.client.on();
+        }
+        if(curstate && (cmd.value === "false" || cmd.value === false || cmd.value === 0 || cmd.value === "0"))
+        {
+          await this.client.off();
+        }
+        return
       }
-      return
+      if(cmd.action === "get"){
+        const curstate = await this.client.getOnOffAttribute();
+        this.publish(`matter/devices/${this.meta.nodeId}`, {
+            state: { [this.meta.name]: curstate },
+        });
+        return
+      }
     }
-    if(cmd.action === "get"){
-      const curstate = await this.client.getOnOffAttribute();
-      this.publish(`matter/devices/${this.meta.nodeId}`, {
-          state: { [this.meta.name]: curstate },
-      });
-      return
+    catch(e){
+      console.error(e)
     }
   }
 }

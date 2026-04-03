@@ -46,24 +46,12 @@ export class MatterMqttBridge {
     });
 
     await this.transport.subscribe("matter/devices/get", async (msg: any) => {
-      console.log(await this.matter.getNodes())
       const s = await this.matter.getNodesDetails()
-      console.log(s[0].deviceData?.basicInformation)
+      await this.transport.publish(`matter/devices/details`, {data: s});
     });
 
-    // 🔹 command
-    await this.transport.subscribe("matter/device/command", async (msg) => {
-      await this.nodeManager.execute(
-        idAsBigInt(msg.nodeId),
-        msg.endpointId,
-        msg.command
-      );
-    });
-
-
-    await this.transport.subscribe("matter/devices/+/get", async (_: any, topic: string) => {
-      // 🔹 Извлекаем nodeId из топика
-      const match = topic.match(/matter\/devices\/(\d+)\/get/);
+    await this.transport.subscribe("matter/devices/+/info", async (_: any, topic: string) => {
+      const match = topic.match(/matter\/devices\/(\d+)\/info/);
       if (!match) return;
 
       const nodeId = BigInt(match[1]);
@@ -76,19 +64,32 @@ export class MatterMqttBridge {
       });
     });
 
+    await this.transport.subscribe("matter/devices/+/get", async (_: any, topic: string) => {
+      const match = topic.match(/matter\/devices\/(\d+)\/get/);
+      if (!match) return;
+
+      const nodeId = BigInt(match[1]);
+
+      await this.nodeManager.publicState(nodeId)
+    });
+
     await this.transport.subscribe("matter/devices/+/set", async (msg: any, topic: string) => {
-      // 🔹 Извлекаем nodeId из топика
       const match = topic.match(/matter\/devices\/(\d+)\/set/);
       if (!match) return;
 
       const nodeId = BigInt(match[1]);
 
-      const info = await this.nodeManager.set(nodeId, msg);
+      await this.nodeManager.set(nodeId, msg);
+    });
 
-      await this.transport.publish(`matter/devices/${nodeId}/info`, {
-        nodeId,
-        info,
-      });
+
+    await this.transport.subscribe("matter/devices/+/command", async (msg: any, topic: string) => {
+      const match = topic.match(/matter\/devices\/(\d+)\/command/);
+      if (!match) return;
+
+      const nodeId = BigInt(match[1]);
+
+      await this.nodeManager.execute(nodeId, msg);
     });
 
   }

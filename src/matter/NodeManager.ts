@@ -11,7 +11,6 @@ import { ClusterRegistry } from "./device/ClusterRegistry.js";
 export class NodeManager {
     private nodes = new Map<bigint, PairedNode>();
     private devices = new Map<string, MatterDevice>();
-    private nodesData = new Map<bigint, Record<string, any>>();
 
   constructor(
     private matter: MatterController,
@@ -34,7 +33,7 @@ export class NodeManager {
         nodeId,
         dev,
         this.transport.publish.bind(this.transport),
-        async () => await this.publicState(nodeId)
+        async () => await this.publicState(nodeId),
       );
 
       await device.init();
@@ -80,13 +79,22 @@ export class NodeManager {
     });
   }
 
-  async execute(nodeId: bigint, endpointId: number, command: ICommands) {
-    console.log(this.devices)
-    const device = this.devices.get(`${nodeId}-${endpointId}`);
-    if (!device) return;
-    console.log(device)
-
-    await device.execute(command);
+  async execute(nodeId: bigint, command: ICommands) {
+    const node = this.nodes.get(nodeId)
+    if (!node) return null;
+    const devices = node.getDevices();
+    for (const device of devices){
+      for (const reg of ClusterRegistry) {
+        const client = device.getClusterClient(reg.cluster);
+        if(!client)continue
+        const meta = await reg.meta(nodeId, device.number ?? 0, client)
+        if(meta.name === command.name && meta.commands.includes(command.action)){
+          const endpoint = this.devices.get(`${nodeId}-${device.number}`)
+          if(!endpoint)continue
+          await endpoint.execute(command);
+        }
+      }
+    }
   }
 
   async set(nodeId: bigint, data: Record<string, any>) {
@@ -101,7 +109,7 @@ export class NodeManager {
         if(meta.name in data && meta.commands.includes("set")){
           const endpoint = this.devices.get(`${nodeId}-${device.number}`)
           if(!endpoint)continue
-          await endpoint.execute({type: meta.name, action: "set", value: data[meta.name]});
+          await endpoint.execute({name: meta.name, action: "set", value: data[meta.name]});
         }
       }
     }
@@ -143,6 +151,7 @@ export class NodeManager {
 
   async publicState(nodeId: bigint){
     const data = await this.getState(nodeId)
+    if(!data)return
     this.transport.publish(`matter/devices/${nodeId.toString()}`, data)
   }
 
@@ -152,10 +161,15 @@ export class NodeManager {
     const node = this.nodes.get(nodeId)
     if (!node) return null;
     const devices = node.getDevices();
-    for (const device of devices){
-      const endpoint = this.devices.get(`${nodeId}-${device.number}`)
-      if(!endpoint)continue
-      for(const [k,v] of Object.entries(await endpoint.getState())){
+
+    const devsState = await Promise.all(devices.map(dev=>{
+      const endpoint = this.devices.get(`${nodeId}-${dev.number}`)
+      if(!endpoint)return undefined
+      return endpoint.getState()
+    }).filter(i=>i !== undefined))
+
+    for(const d of devsState){
+      for(const [k,v] of Object.entries(d)){
         data[k] = v
       }
     }

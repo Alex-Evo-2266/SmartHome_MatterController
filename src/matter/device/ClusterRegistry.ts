@@ -24,7 +24,6 @@ type IClusterRegistry = {
 const createHandler = (Class: HandlerConstructor, meta: ClusterHandlerMetaCB | ClusterHandlerMeta) => ({
     meta: async (nodeId, endpointId, client) => typeof(meta) === 'function'? await meta(nodeId, endpointId, client): meta,
     create: async (client: any, ctx:Ictx) =>{
-        console.log(ctx.nodeId, ctx.endpointId, client)
         return new Class(client, ctx.publish, ctx.publishState, typeof(meta) === 'function'? await meta(ctx.nodeId, ctx.endpointId, client): meta)
     }
 })
@@ -33,21 +32,15 @@ const createHandler = (Class: HandlerConstructor, meta: ClusterHandlerMetaCB | C
 export const ClusterRegistry: IClusterRegistry = [
   {
     cluster: OnOff.Complete,
-    ...createHandler(OnOffHandler, OnOffHandlerMeta) 
-    // create: async (client, ctx) =>
-    //     new OnOffHandler(client, ctx.publish, await OnOffHandlerMeta(ctx.nodeId, ctx.endpointId, client)),
+    ...createHandler(OnOffHandler, OnOffHandlerMeta)
   },
   {
     cluster: LevelControl.Complete,
     ...createHandler(LevelControlHandler, LevelControlHandlerMeta)
-    // create: async (client, ctx) =>
-    //     new LevelControlHandler(client, ctx.publish, await LevelControlHandlerMeta(ctx.nodeId, ctx.endpointId, client)),
   },
   {
     cluster: ColorControl.Cluster,
     ...createHandler(ColorTemperatureHandler, ColorControlHandlerMeta)
-    // create: async (client, ctx) => 
-    //     new ColorTemperatureHandler(client, ctx.publish, await ColorControlHandlerMeta())
   }
 
 ];

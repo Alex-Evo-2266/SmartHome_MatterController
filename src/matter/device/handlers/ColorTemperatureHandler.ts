@@ -1,6 +1,7 @@
 import { ColorControl } from "@matter/main/clusters";
 import { ClusterClientObj } from "@matter/main/protocol";
 import { ClusterHandlerMeta, ClusterHandlerMetaCB, IClusterHandler } from "./IClusterHandler.js";
+import { ICommands } from "./ICommands.js";
 
 const toKelvin = (mired: number) => Math.round(1000000 / mired);
 
@@ -22,16 +23,17 @@ export const ColorControlHandlerMeta: ClusterHandlerMetaCB = async (nodeId, endp
 }
 
 export class ColorTemperatureHandler implements IClusterHandler {
-  name = "ColorTemp";
-
   private currentTemp = 2700;
+  public meta: ClusterHandlerMeta;
 
   constructor(
     private client: ClusterClientObj<ColorControl.Complete>,
     private publish: Function,
     private publishState: Function,
-    private meta: ClusterHandlerMeta
-  ) {}
+    meta: ClusterHandlerMeta,
+  ) {
+    this.meta=meta
+  }
 
   async init() {
     const curLevel = await this.client.getColorTemperatureMiredsAttribute();
@@ -46,32 +48,35 @@ export class ColorTemperatureHandler implements IClusterHandler {
   }
 
   async getState(){
-      let state = await this.client.getColorTemperatureMiredsAttribute();
-      if(state === undefined) state = this.currentTemp
-      return {[this.meta.name]: toKelvin(state)}
+      return {[this.meta.name]: this.currentTemp}
   }
 
-  canHandle(cmd: any) {
-    return cmd.type === this.meta.name
+  canHandle(cmd: ICommands) {
+    return cmd.name === this.meta.name
     // return cmd.type === this.name;
   }
 
-  async execute(cmd: any) {
-    if (cmd.action === "set" && typeof cmd.value === "number") {
-      const mired = Math.round(1000000 / cmd.value); // K -> mired
-      const options = { executeIfOff: false, coupleColorTempToLevel: false };
-      await this.client.moveToColorTemperature({
-        colorTemperatureMireds: mired,
-        transitionTime: 0,
-        optionsMask: options,
-        optionsOverride: options
-      });
+  async execute(cmd: ICommands) {
+    try{
+      if (cmd.action === "set" && typeof cmd.value === "number") {
+        const mired = Math.round(1000000 / cmd.value); // K -> mired
+        const options = { executeIfOff: false, coupleColorTempToLevel: false };
+        await this.client.moveToColorTemperature({
+          colorTemperatureMireds: mired,
+          transitionTime: 0,
+          optionsMask: options,
+          optionsOverride: options
+        });
 
-      this.currentTemp = cmd.value;
-      this.publishState();
+        this.currentTemp = cmd.value;
+        this.publishState();
+      }
+      else if(cmd.action === "get") {
+        this.publishState();
+      }
     }
-    else if(cmd.action === "get") {
-      this.publishState();
+    catch(e){
+      console.log(e)
     }
   }
 }

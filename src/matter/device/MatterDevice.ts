@@ -28,8 +28,11 @@ export class MatterDevice {
 
   async getState() {
     const data: Record<string, any> = {}
-    for (const h of this.handlers) {
-        for(const [k, v] of Object.entries(await h.getState())){
+
+    const devi = await Promise.all(this.handlers.map(h=>h.getState()))
+
+    for (const handlersState of devi) {
+        for(const [k, v] of Object.entries(handlersState)){
             data[k]=v
         }
     }
@@ -37,6 +40,6 @@ export class MatterDevice {
   }
 
   getCapabilities() {
-    return this.handlers.map(h => h.name);
+    return this.handlers.map(h => h.meta.name);
   }
 }
