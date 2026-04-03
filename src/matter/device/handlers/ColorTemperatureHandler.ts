@@ -1,0 +1,77 @@
+import { ColorControl } from "@matter/main/clusters";
+import { ClusterClientObj } from "@matter/main/protocol";
+import { ClusterHandlerMeta, ClusterHandlerMetaCB, IClusterHandler } from "./IClusterHandler.js";
+
+const toKelvin = (mired: number) => Math.round(1000000 / mired);
+
+export const ColorControlHandlerMeta: ClusterHandlerMetaCB = async (nodeId, endpointId, client) => {
+    const min = await client.getColorTempPhysicalMaxMiredsAttribute?.()
+    const max = await client.getColorTempPhysicalMinMiredsAttribute?.()
+
+    const minK = min ? toKelvin(min) : undefined;
+    const maxK = max ? toKelvin(max) : undefined;
+  return{
+    name: `temp_${endpointId}`,
+    commands: ["set", "get"],
+    attributes: ["currentTemp"],
+    max: maxK,
+    min: minK,
+    nodeId,
+    endpointId
+  }
+}
+
+export class ColorTemperatureHandler implements IClusterHandler {
+  name = "ColorTemp";
+
+  private currentTemp = 2700;
+
+  constructor(
+    private client: ClusterClientObj<ColorControl.Complete>,
+    private publish: Function,
+    private publishState: Function,
+    private meta: ClusterHandlerMeta
+  ) {}
+
+  async init() {
+    const curLevel = await this.client.getColorTemperatureMiredsAttribute();
+    if(curLevel !== null && curLevel !== undefined)
+        this.currentTemp = toKelvin(curLevel)
+    this.publishState();
+
+    this.client.addColorTemperatureMiredsAttributeListener((value: number) => {
+      this.currentTemp = toKelvin(value);
+      this.publishState();
+    });
+  }
+
+  async getState(){
+      let state = await this.client.getColorTemperatureMiredsAttribute();
+      if(state === undefined) state = this.currentTemp
+      return {[this.meta.name]: toKelvin(state)}
+  }
+
+  canHandle(cmd: any) {
+    return cmd.type === this.meta.name
+    // return cmd.type === this.name;
+  }
+
+  async execute(cmd: any) {
+    if (cmd.action === "set" && typeof cmd.value === "number") {
+      const mired = Math.round(1000000 / cmd.value); // K -> mired
+      const options = { executeIfOff: false, coupleColorTempToLevel: false };
+      await this.client.moveToColorTemperature({
+        colorTemperatureMireds: mired,
+        transitionTime: 0,
+        optionsMask: options,
+        optionsOverride: options
+      });
+
+      this.currentTemp = cmd.value;
+      this.publishState();
+    }
+    else if(cmd.action === "get") {
+      this.publishState();
+    }
+  }
+}

@@ -17,5 +17,5 @@ export interface ITransport {
    * @param topic топик/канал
    * @param callback функция, вызываемая при получении сообщения
    */
-  subscribe(topic: string, callback: (message: any) => void): Promise<void>;
+  subscribe(topic: string, callback: (message: any, topic: string) => void): Promise<void>;
 }

@@ -51,9 +51,45 @@ export class MatterMqttBridge {
       console.log(s[0].deviceData?.basicInformation)
     });
 
-    // 🔹 toggle
-    await this.transport.subscribe("matter/device/toggle", async (msg: any) => {
-      await this.nodeManager.toggle(idAsBigInt(msg.nodeId));
+    // 🔹 command
+    await this.transport.subscribe("matter/device/command", async (msg) => {
+      await this.nodeManager.execute(
+        idAsBigInt(msg.nodeId),
+        msg.endpointId,
+        msg.command
+      );
     });
+
+
+    await this.transport.subscribe("matter/devices/+/get", async (_: any, topic: string) => {
+      // 🔹 Извлекаем nodeId из топика
+      const match = topic.match(/matter\/devices\/(\d+)\/get/);
+      if (!match) return;
+
+      const nodeId = BigInt(match[1]);
+
+      const info = await this.nodeManager.getDeviceInfo(nodeId);
+
+      await this.transport.publish(`matter/devices/${nodeId}/info`, {
+        nodeId,
+        info,
+      });
+    });
+
+    await this.transport.subscribe("matter/devices/+/set", async (msg: any, topic: string) => {
+      // 🔹 Извлекаем nodeId из топика
+      const match = topic.match(/matter\/devices\/(\d+)\/set/);
+      if (!match) return;
+
+      const nodeId = BigInt(match[1]);
+
+      const info = await this.nodeManager.set(nodeId, msg);
+
+      await this.transport.publish(`matter/devices/${nodeId}/info`, {
+        nodeId,
+        info,
+      });
+    });
+
   }
 }

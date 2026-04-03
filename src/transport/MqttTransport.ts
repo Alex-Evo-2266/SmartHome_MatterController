@@ -3,7 +3,7 @@ import { connect, MqttClient } from "mqtt";
 import { config } from "../config.js";
 import { ITransport } from "../types/Transport.js";
 
-type MessageCallback = (msg: any) => void;
+type MessageCallback = (msg: any, topic: string) => void;
 
 function jsonReplacer(key: string, value: any) {
   return typeof value === "bigint" ? value.toString() : value;
@@ -37,8 +37,8 @@ export class MqttTransport implements ITransport {
 
       // 🔹 обработка сообщений
       this.client.on("message", (topic, payload) => {
-        const cb = this.subscriptions.get(topic);
-        if (!cb) return;
+        // const cb = this.subscriptions.get(topic);
+        // if (!cb) return;
 
         let msg: any;
         try {
@@ -47,8 +47,17 @@ export class MqttTransport implements ITransport {
           console.warn(`[MQTT] Invalid JSON on topic ${topic}`);
           return;
         }
+        console.log("P(", topic)
+        // 🔹 ищем подписку с wildcard
+        for (const [sub, cb] of this.subscriptions.entries()) {
+          const regex = new RegExp("^" + sub.replace("+", "[^/]+").replace("#", ".+") + "$");
+          console.log("P(", topic, sub)
+          if (regex.test(topic)) {
+            cb(msg, topic);
+          }
+        }
 
-        cb(msg);
+        // cb(msg, topic);
       });
     });
   }

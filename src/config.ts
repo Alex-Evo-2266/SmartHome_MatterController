@@ -1,6 +1,25 @@
-export const MQTT_URL = "mqtt://localhost:1883";
 
-export const MATTER = {
-  fabricId: 1,
-  nodeId: BigInt(1),
+// config/config.ts
+export const config = {
+  mqtt: {
+    url: "mqtt://localhost:1884",
+    baseTopik: "matter",
+    user: "root",
+    password: "root"
+  },
+
+  matter: {
+    storagePath: "./matter-storage",
+    fabricLabel: "My Controller",
+  },
+
+  ble: {
+    enabled: true,
+    hciId: 0,
+  },
+
+  wifi: {
+    ssid: "ASUS",
+    password: "ac47a75c42"
+  }
 };
