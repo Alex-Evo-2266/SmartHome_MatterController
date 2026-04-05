@@ -37,15 +37,19 @@ export class ColorTemperatureHandler implements IClusterHandler {
   }
 
   async init() {
-    const curLevel = await this.client.getColorTemperatureMiredsAttribute();
-    if(curLevel !== null && curLevel !== undefined)
-        this.currentTemp = toKelvin(curLevel)
+    await this.loadNewData()
     this.publishState();
 
     this.client.addColorTemperatureMiredsAttributeListener((value: number) => {
       this.currentTemp = toKelvin(value);
       this.publishState();
     });
+  }
+
+  async loadNewData() {
+    const curLevel = await this.client.getColorTemperatureMiredsAttribute();
+    if(curLevel !== null && curLevel !== undefined)
+        this.currentTemp = toKelvin(curLevel)
   }
 
   async getState(){
@@ -73,6 +77,7 @@ export class ColorTemperatureHandler implements IClusterHandler {
         this.publishState();
       }
       else if(cmd.action === "get") {
+        await this.loadNewData()
         this.publishState();
       }
     }

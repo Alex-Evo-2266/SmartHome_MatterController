@@ -18,19 +18,21 @@ import {
 } from "@matter/main/types";
 
 import { GeneralCommissioning } from "@matter/main/clusters";
-import { config } from "../config.js";
+import { Config } from "../config/type.js";
 
 const logger = Logger.get("MatterController");
 
 export class MatterController {
   private controller!: CommissioningController;
   private storageService: StorageService;
+  private config: Config
 
   private uniqueId!: string;
   private fabricLabel!: string;
 
-  constructor(private environment: Environment) {
+  constructor(private environment: Environment, config: Config) {
     this.storageService = environment.get(StorageService);
+    this.config = config
   }
 
   // 🔹 INIT (как CLI блок "Collect all needed data")
@@ -48,7 +50,7 @@ export class MatterController {
     // 🔸 fabricLabel
     this.fabricLabel = await controllerStorage.get(
       "fabriclabel",
-      config.matter.fabricLabel
+      this.config.matter.fabricLabel
     );
     await controllerStorage.set("fabriclabel", this.fabricLabel);
 
@@ -82,13 +84,13 @@ export class MatterController {
     };
 
     // 💥 WiFi (ВАЖНО для BLE)
-    if (config.wifi.ssid && config.wifi.password) {
+    if (this.config.wifi.ssid && this.config.wifi.password) {
       commissioningOptions.wifiNetwork = {
-        wifiSsid: config.wifi.ssid,
-        wifiCredentials: config.wifi.password,
+        wifiSsid: this.config.wifi.ssid,
+        wifiCredentials: this.config.wifi.password,
       };
 
-      logger.info(`Using WiFi: ${config.wifi.ssid}`);
+      logger.info(`Using WiFi: ${this.config.wifi.ssid}`);
     }
 
     const options: NodeCommissioningOptions = {
@@ -100,7 +102,8 @@ export class MatterController {
         },
 
         discoveryCapabilities: {
-          ble: config.ble.enabled, // 💥 ключевая строка
+          ble: this.config.ble.enabled, // 💥 ключевая строка
+          onIpNetwork: true
         },
       },
 
@@ -114,6 +117,45 @@ export class MatterController {
     logger.info(`Commissioned nodeId=${nodeId}`);
 
     return nodeId;
+  }
+
+  async shutdown() {
+    logger.info("Shutting down MatterController...");
+
+    try {
+      const nodes = this.getNodes();
+
+      for (const nodeId of nodes) {
+        try {
+          const node = await this.getNode(nodeId);
+
+          if (node?.isConnected) {
+            node.disconnect();
+          }
+        } catch (e) {
+          logger.warn(`Error disconnecting node ${nodeId}:`, e);
+        }
+      }
+
+      await this.controller?.close?.();
+
+      logger.info("MatterController stopped");
+    } catch (e) {
+      logger.error("Shutdown error:", e);
+    }
+  }
+
+  // 🔹 Удаление устройства
+  async removeNode(nodeId: NodeId) {
+    const node = await this.getNode(nodeId);
+
+    if (node?.isConnected) {
+      node.disconnect();
+    }
+
+    await this.controller.removeNode(nodeId);
+
+    logger.info(`Removed nodeId=${nodeId}`);
   }
 
   // 🔹 Получить все ноды
@@ -134,7 +176,6 @@ export class MatterController {
   // 🔹 Подключение (ВАЖНО)
   async connectNode(nodeId: NodeId) {
     const node = await this.getNode(nodeId);
-console.log(node, "d")
     if (!node.isConnected) {
       node.connect();
     }

@@ -41,6 +41,10 @@ export const ClusterRegistry: IClusterRegistry = [
   {
     cluster: ColorControl.Cluster,
     ...createHandler(ColorTemperatureHandler, ColorControlHandlerMeta)
+  },
+  {
+    cluster: ColorControl.Cluster,
+    ...createHandler(ColorTemperatureHandler, ColorControlHandlerMeta)
   }
 
 ];

@@ -1,5 +1,5 @@
 // src/matter/NodeManager.ts
-import { Command, NodeId } from "@matter/main/types";
+import { NodeId } from "@matter/main/types";
 import { MatterController } from "./MatterController.js";
 import { ITransport } from "../types/Transport.js";
 import { PairedNode } from "@project-chip/matter.js/device";
@@ -7,6 +7,11 @@ import { createDevice } from "./device/createDevice.js";
 import { MatterDevice } from "./device/MatterDevice.js";
 import { ICommands } from "./device/handlers/ICommands.js";
 import { ClusterRegistry } from "./device/ClusterRegistry.js";
+import { Logger } from "@matter/main";
+import { idAsBigInt } from "../helpers/bigIntConvert.js";
+import { checkValue } from "../helpers/check.js";
+
+const logger = Logger.get("MatterController");
 
 export class NodeManager {
     private nodes = new Map<bigint, PairedNode>();
@@ -41,7 +46,7 @@ export class NodeManager {
       this.devices.set(`${nodeId}-${dev.number}`, device);
 
       // 🔹 snapshot
-      await this.transport.publish("matter/events/device", {
+      await this.transport.publish("events/device", {
         nodeId,
         endpointId: dev.number,
         capabilities: device.getCapabilities(),
@@ -49,31 +54,55 @@ export class NodeManager {
     }
   }
 
+  // 🔹 Удаление устройства
+  async removeNode(nodeIdStr: string) {
+    const nodeId = idAsBigInt(nodeIdStr)
+    const node = this.nodes.get(nodeId)
+
+    if(node){
+      this.nodes.delete(nodeId)
+      for(const [k, v] of Object.entries(this.devices)){
+        const id = k.split('-')[0]
+        console.log("U7", k, id, nodeId)
+        if(nodeId === idAsBigInt(id))
+          this.devices.delete(k)
+      }
+    }
+
+    if (node?.isConnected) {
+      node.disconnect();
+    }
+
+    await this.matter.removeNode(NodeId(nodeId));
+
+    logger.info(`Removed nodeId=${nodeId}`);
+  }
+
   // 🔹 Подписка на ВСЕ события
   private subscribeToEvents(nodeId: bigint, node: PairedNode) {
     node.events.attributeChanged.on((data: any) => {
-      this.transport.publish("matter/events/attribute", {
+      this.transport.publish("events/attribute", {
         nodeId,
         ...data,
       });
     });
 
     node.events.eventTriggered.on((data: any) => {
-      this.transport.publish("matter/events/event", {
+      this.transport.publish("events/event", {
         nodeId,
         ...data,
       });
     });
 
     node.events.stateChanged.on((state: any) => {
-      this.transport.publish("matter/events/state", {
+      this.transport.publish("events/state", {
         nodeId,
         state,
       });
     });
 
     node.events.structureChanged.on(() => {
-      this.transport.publish("matter/events/structure", {
+      this.transport.publish("events/structure", {
         nodeId,
       });
     });
@@ -97,7 +126,7 @@ export class NodeManager {
     }
   }
 
-  async set(nodeId: bigint, data: Record<string, any>) {
+  async set(nodeId: bigint, data: Record<string, unknown>) {
     const node = this.nodes.get(nodeId)
     if (!node) return null;
     const devices = node.getDevices();
@@ -108,14 +137,17 @@ export class NodeManager {
         const meta = await reg.meta(nodeId, device.number ?? 0, client)
         if(meta.name in data && meta.commands.includes("set")){
           const endpoint = this.devices.get(`${nodeId}-${device.number}`)
-          if(!endpoint)continue
-          await endpoint.execute({name: meta.name, action: "set", value: data[meta.name]});
+          const value = data[meta.name]
+          if(!endpoint || !checkValue(value))continue
+          await endpoint.execute({name: meta.name, action: "set", value: value});
         }
       }
     }
   }
 
   async getDeviceInfo(nodeId: bigint) {
+    console.log(this.devices)
+    console.log(this.nodes)
     const node = this.nodes.get(nodeId);
     if (!node) return null;
 
@@ -153,7 +185,7 @@ export class NodeManager {
   async publicState(nodeId: bigint){
     const data = await this.getState(nodeId)
     if(!data)return
-    this.transport.publish(`matter/devices/${nodeId.toString()}`, data)
+    this.transport.publish(`devices/${nodeId.toString()}`, data)
   }
 
 

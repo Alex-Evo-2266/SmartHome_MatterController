@@ -30,9 +30,7 @@ export class OnOffHandler implements IClusterHandler {
   }
 
   async init() {
-    const state = await this.client.getOnOffAttribute();
-    this.currentState = state
-
+    await this.loadNewData()
     this.publishState()
 
 
@@ -40,6 +38,12 @@ export class OnOffHandler implements IClusterHandler {
       this.currentState = value
       this.publishState()
     });
+  }
+
+
+  async loadNewData() {
+    const state = await this.client.getOnOffAttribute();
+    this.currentState = state
   }
 
   async getState(){
@@ -77,10 +81,8 @@ export class OnOffHandler implements IClusterHandler {
         return
       }
       if(cmd.action === "get"){
-        const curstate = await this.client.getOnOffAttribute();
-        this.publish(`matter/devices/${this.meta.nodeId}`, {
-            state: { [this.meta.name]: curstate },
-        });
+        await this.loadNewData()
+        this.publishState()
         return
       }
     }

@@ -1,0 +1,17 @@
+mqtt:
+  url: "mqtt://localhost:1884"
+  baseTopik: "matter"
+  user: "root"
+  password: "root"
+
+matter:
+  storagePath: "./matter-storage"
+  fabricLabel: "My Controller"
+
+ble:
+  enabled: true
+  hciId: 0
+
+wifi:
+  ssid: "ASUS"
+  password: "ac47a75c42"

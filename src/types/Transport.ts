@@ -10,12 +10,12 @@ export interface ITransport {
    * @param topic топик/канал
    * @param message объект сообщения
    */
-  publish(topic: string, message: any): Promise<void>;
+  publish(topic: string, message: unknown): Promise<void>;
 
   /**
    * Подписка на сообщения из топика
    * @param topic топик/канал
    * @param callback функция, вызываемая при получении сообщения
    */
-  subscribe(topic: string, callback: (message: any, topic: string) => void): Promise<void>;
+  subscribe(topic: string, callback: (message: unknown, topic: string) => void): Promise<void>;
 }

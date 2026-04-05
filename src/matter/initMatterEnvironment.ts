@@ -2,9 +2,9 @@
 import { Environment, StorageService, singleton } from "@matter/main";
 import { Ble } from "@matter/main/protocol";
 import { NodeJsBle } from "@matter/nodejs-ble";
-import { config } from "../config.js";
+import { Config } from "../config/type.js";
 
-export async function initMatterEnvironment() {
+export async function initMatterEnvironment(config: Config) {
   const environment = Environment.default;
 
   // 🔹 1. задаём storage path (как CLI --storage-path)
