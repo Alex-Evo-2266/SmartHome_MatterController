@@ -8,7 +8,7 @@ export interface Config {
   };
 
   matter: {
-    storagePath: string;
+    storagePath?: string;
     fabricLabel: string;
   };
 

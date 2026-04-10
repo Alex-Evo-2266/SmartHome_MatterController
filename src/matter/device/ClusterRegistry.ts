@@ -3,7 +3,7 @@
 import { ColorControl, LevelControl, OnOff } from "@matter/main/clusters";
 import { OnOffHandler, OnOffHandlerMeta } from "./handlers/OnOffHandler.js";
 import { LevelControlHandler, LevelControlHandlerMeta } from "./handlers/LevelControlHandler.js";
-import { ColorControlHandlerMeta, ColorTemperatureHandler } from "./handlers/ColorTemperatureHandler.js";
+import { ColorControlHandlerMeta, ColorHandler } from "./handlers/ColorHandler.js";
 import { ClusterHandlerMeta, ClusterHandlerMetaCB, IClusterHandler } from "./handlers/IClusterHandler.js";
 
 type Ictx = {
@@ -40,11 +40,7 @@ export const ClusterRegistry: IClusterRegistry = [
   },
   {
     cluster: ColorControl.Cluster,
-    ...createHandler(ColorTemperatureHandler, ColorControlHandlerMeta)
+    ...createHandler(ColorHandler, ColorControlHandlerMeta)
   },
-  {
-    cluster: ColorControl.Cluster,
-    ...createHandler(ColorTemperatureHandler, ColorControlHandlerMeta)
-  }
 
 ];

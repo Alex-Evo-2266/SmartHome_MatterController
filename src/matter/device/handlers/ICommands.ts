@@ -1,7 +1,7 @@
 // src/matter/device/handlers/ICommands.ts
 
 export interface ICommands {
-    name: string
+    attribute: string
     action: string
-    value?: string | null | number | boolean
+    value?: string | null | number | boolean | object
 }

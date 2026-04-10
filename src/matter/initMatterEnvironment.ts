@@ -8,9 +8,9 @@ export async function initMatterEnvironment(config: Config) {
   const environment = Environment.default;
 
   // 🔹 1. задаём storage path (как CLI --storage-path)
-  environment.vars.set("storage.path", config.matter.storagePath);
+  environment.vars.set("storage.path", config.matter.storagePath ?? "./config/matter-storage");
 
-  console.log("[Matter] Storage path:", config.matter.storagePath);
+  console.log("[Matter] Storage path:", config.matter.storagePath ?? "./config/matter-storage");
 
   // 🔹 2. BLE
   if (config.ble.enabled) {

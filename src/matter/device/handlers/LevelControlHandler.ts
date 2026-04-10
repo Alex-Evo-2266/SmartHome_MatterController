@@ -12,7 +12,7 @@ export const LevelControlHandlerMeta: ClusterHandlerMetaCB = async (nodeId, endp
 	return{
 		name: `level_${endpointId}`,
 		commands: ["set", "up", "down", "stop", "get"],
-		attributes: ["currentLevel"],
+		attributes: [`level_${endpointId}`],
 		max,
 		min,
 		type: "number",
@@ -56,7 +56,7 @@ export class LevelControlHandler implements IClusterHandler {
 	}
 
 	canHandle(cmd: ICommands) {
-		return cmd.name === this.meta.name
+		return this.meta.attributes.includes(cmd.attribute)
 	}
 
 

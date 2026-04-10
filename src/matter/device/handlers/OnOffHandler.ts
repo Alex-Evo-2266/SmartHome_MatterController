@@ -9,7 +9,7 @@ export const OnOffHandlerMeta: ClusterHandlerMetaCB = async(nodeId, endpointId) 
   return{
     name: `power_${endpointId}`,
     commands: ["on", "off", "toggle", "set", "get"],
-    attributes: ["onOff"],
+    attributes: [`power_${endpointId}`],
     type: "binary",
     nodeId,
     endpointId
@@ -51,7 +51,7 @@ export class OnOffHandler implements IClusterHandler {
   }
 
   canHandle(cmd: ICommands) {
-    return cmd.name === this.meta.name
+    return this.meta.attributes.includes(cmd.attribute)
   }
 
   async execute(cmd: ICommands) {

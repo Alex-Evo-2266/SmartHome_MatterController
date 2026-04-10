@@ -117,7 +117,7 @@ export class NodeManager {
         const client = device.getClusterClient(reg.cluster);
         if(!client)continue
         const meta = await reg.meta(nodeId, device.number ?? 0, client)
-        if(meta.name === command.name && meta.commands.includes(command.action)){
+        if(meta.attributes.includes(command.attribute) && meta.commands.includes(command.action)){
           const endpoint = this.devices.get(`${nodeId}-${device.number}`)
           if(!endpoint)continue
           await endpoint.execute(command);
@@ -135,19 +135,19 @@ export class NodeManager {
         const client = device.getClusterClient(reg.cluster);
         if(!client)continue
         const meta = await reg.meta(nodeId, device.number ?? 0, client)
-        if(meta.name in data && meta.commands.includes("set")){
-          const endpoint = this.devices.get(`${nodeId}-${device.number}`)
-          const value = data[meta.name]
-          if(!endpoint || !checkValue(value))continue
-          await endpoint.execute({name: meta.name, action: "set", value: value});
+        for(const atr of meta.attributes){
+          if(atr in data && meta.commands.includes("set")){
+            const endpoint = this.devices.get(`${nodeId}-${device.number}`)
+            const value = data[atr]
+            if(!endpoint || !checkValue(value))continue
+            await endpoint.execute({attribute: atr, action: "set", value: value});
+          }
         }
       }
     }
   }
 
   async getDeviceInfo(nodeId: bigint) {
-    console.log(this.devices)
-    console.log(this.nodes)
     const node = this.nodes.get(nodeId);
     if (!node) return null;
 
