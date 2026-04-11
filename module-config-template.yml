@@ -1,0 +1,56 @@
+name: __MODULE_NAME__
+name_module: matter-module
+multiply: false
+type: docker
+containers:
+  - name: __MODULE_NAME__
+    config:
+      build:
+        context: ./matter-module-frontend
+        dockerfile: Dockerfile
+        args:
+          CONTAINER_NAME: __MODULE_NAME__
+          PORT: 3000
+          NEXT_BASE_PATH: /modules/__MODULE_NAME__
+          NEXT_PUBLIC_WS_PREFIX: __MODULE_NAME__
+      command: sh -c "cp -r /app/config_local/* /app/config && npm run start"
+      restart: always
+      environment:
+        CONTAINER_NAME: __MODULE_NAME__
+        PORT: 3000
+        API_PATH_PREFIX: /modules/__MODULE_NAME__
+        NEXT_PUBLIC_WS_PREFIX: __MODULE_NAME__
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.__MODULE_NAME___http.rule=PathPrefix(`/modules/__MODULE_NAME__`)
+        - traefik.http.routers.__MODULE_NAME___http.entrypoints=web
+        - traefik.http.routers.__MODULE_NAME___http.middlewares=moduleauth@docker,module-__MODULE_NAME__-strip
+        - traefik.http.routers.__MODULE_NAME___http.service=__MODULE_NAME__
+        - traefik.http.routers.__MODULE_NAME___https.rule=PathPrefix(`/modules/__MODULE_NAME__`)
+        - traefik.http.routers.__MODULE_NAME___https.entrypoints=websecure
+        - traefik.http.routers.__MODULE_NAME___https.middlewares=moduleauth@docker,module-__MODULE_NAME__-strip
+        - traefik.http.routers.__MODULE_NAME___https.tls=true
+        - traefik.http.routers.__MODULE_NAME___https.service=__MODULE_NAME__
+        - traefik.http.services.__MODULE_NAME__.loadbalancer.server.port=3000
+        - traefik.http.middlewares.module-__MODULE_NAME__-strip.stripprefixregex.regex=^/modules/__MODULE_NAME__
+        - traefik.http.routers.__MODULE_NAME____ws.rule=PathPrefix(`/ws/__MODULE_NAME__`)
+        - traefik.http.routers.__MODULE_NAME____ws.service=__MODULE_NAME____ws
+        - traefik.http.services.__MODULE_NAME____ws.loadbalancer.server.port=3000
+        - traefik.http.routers.__MODULE_NAME____ws.tls=true
+        - traefik.http.routers.__MODULE_NAME____ws.entrypoints=websecure
+      volumes:
+        - ${CONFIGURATE_DIR}/__MODULE_NAME___matter-controller:/app/config
+  - name: __MODULE_NAME___matter-controller
+    config:
+      build:
+        context: .
+        dockerfile: Dockerfile
+      restart: unless-stopped
+      volumes:
+        - ${CONFIGURATE_DIR}/__MODULE_NAME___matter-controller/config:/app/config
+        - ${CONFIGURATE_DIR}/__MODULE_NAME___matter-controller/matter-storage:/app/matter-storage
+      environment:
+        - TZ=Europe/Moscow
+        - NODE_ENV=production
+      privileged: true
+      network_mode: host

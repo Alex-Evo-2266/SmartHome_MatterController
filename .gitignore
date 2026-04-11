@@ -142,3 +142,10 @@ vite.config.ts.timestamp-*
 */config.ts
 
 matter-storage
+
+
+docker-compose.yml
+
+module-config.yml
+
+matter-module_matter-controller
