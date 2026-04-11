@@ -39,7 +39,7 @@ containers:
         - traefik.http.routers.__MODULE_NAME____ws.tls=true
         - traefik.http.routers.__MODULE_NAME____ws.entrypoints=websecure
       volumes:
-        - ${CONFIGURATE_DIR}/__MODULE_NAME___matter-controller:/app/config
+        - ${CONFIGURATE_DIR}/__MODULE_NAME__:/app/config
   - name: __MODULE_NAME___matter-controller
     config:
       build:
@@ -47,8 +47,8 @@ containers:
         dockerfile: Dockerfile
       restart: unless-stopped
       volumes:
-        - ${CONFIGURATE_DIR}/__MODULE_NAME___matter-controller/config:/app/config
-        - ${CONFIGURATE_DIR}/__MODULE_NAME___matter-controller/matter-storage:/app/matter-storage
+        - ${CONFIGURATE_DIR}/__MODULE_NAME__/config:/app/config
+        - ${CONFIGURATE_DIR}/__MODULE_NAME__/matter-storage:/app/matter-storage
       environment:
         - TZ=Europe/Moscow
         - NODE_ENV=production
