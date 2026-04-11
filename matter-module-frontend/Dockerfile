@@ -28,8 +28,8 @@ ENV NEXT_PUBLIC_WS_PREFIX=${NEXT_PUBLIC_WS_PREFIX}
 # проверка (очень полезно в дебаге)
 RUN ls node_modules/.bin | grep tsc
 
-RUN npm run build
 RUN mkdir -p config
+RUN npm run build
 RUN npm run generate:pages
 
 # 4. Production-слой (минимальный)
