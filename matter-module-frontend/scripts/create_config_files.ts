@@ -40,7 +40,7 @@ function extractPageNameFromMeta(filePath: string): {
   name: string,
   pageName: string,
   auth: {
-    role: string[]
+    roles: string[]
     iframe_only?: boolean
   }
 } | undefined {
@@ -83,7 +83,7 @@ function main() {
         name: 'Без названия',
         pageName: route.slice(1),
         auth: {
-          role: ["admin"],
+          roles: ["admin"],
           iframe_only: false
         }
       }
