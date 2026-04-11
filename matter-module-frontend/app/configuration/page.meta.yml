@@ -1,4 +1,4 @@
 name: configuration
 page_name: configuration
 auth:
-  role: ["admin"]
+  roles: ["admin"]
