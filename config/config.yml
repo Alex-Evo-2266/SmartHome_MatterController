@@ -1,6 +1,7 @@
 mqtt:
   url: "mqtt://localhost:1884"
   baseTopik: "matter"
+  urlInDocker: "mqtt://mosquitto:1883"
   user: "root"
   password: "root"
 
@@ -13,5 +14,5 @@ ble:
   hciId: 0
 
 wifi:
-  ssid: "ASUS"
-  password: "ac47a75c42"
+  ssid: ""
+  password: ""

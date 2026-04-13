@@ -9,6 +9,7 @@ export async function createMqttClient(ws: WSServer) {
   const conf: any = await controllerConfig.readConf();
 
   const url = conf?.mqtt?.urlInDocker || "mqtt://mosquitto:1883";
+  const baseTopik = conf?.mqtt?.baseTopik || "module/data";
   const username = conf?.mqtt?.user;
   const password = conf?.mqtt?.password;
 
@@ -27,6 +28,7 @@ export async function createMqttClient(ws: WSServer) {
     host: parsedUrl.hostname,
     port: Number(parsedUrl.port) || 1883,
     isDebug: true,
+    topic: `${baseTopik}/#`,
     username,
     password
   });
