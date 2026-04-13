@@ -9,7 +9,6 @@ export async function createMqttClient(ws: WSServer) {
   const conf: any = await controllerConfig.readConf();
 
   const url = conf?.mqtt?.urlInDocker || "mqtt://mosquitto:1883";
-  const baseTopik = conf?.mqtt?.baseTopik || "module/data";
   const username = conf?.mqtt?.user;
   const password = conf?.mqtt?.password;
 
@@ -38,4 +37,6 @@ export async function createMqttClient(ws: WSServer) {
     console.log("mqtt", t, mes)
     ws.broadcast(JSON.stringify({ topik: t, message: mes }));
   });
+
+  mqttClient.connect()
 }
