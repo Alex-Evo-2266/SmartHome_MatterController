@@ -1,6 +1,6 @@
-import { WSServer } from "@/lib/ws/WSServer";
+import { WSServer } from "../lib/ws/WSServer";
 import { controllerConfig } from "./configManager";
-import { MQTT } from "@/lib/mqtt/mqttClient";
+import { MQTT } from "../lib/mqtt/mqttClient";
 
 let mqttClient: MQTT | null = null;
 
