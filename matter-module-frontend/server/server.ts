@@ -4,6 +4,7 @@ import { parse } from 'url';
 
 const port = process.env.PORT || 3000;
 const dev = process.env.NODE_ENV !== 'production';
+export const NEXT_PUBLIC_WS_PREFIX = process.env.NEXT_PUBLIC_WS_PREFIX
 
 const app = next({ dev });
 const handle = app.getRequestHandler();
@@ -20,7 +21,7 @@ app.prepare().then(() => {
 
   ws.connect({
     server,
-    path: "/ws/module",
+    path: `/ws/${NEXT_PUBLIC_WS_PREFIX}`,
     onMessage(msg) {
       console.log(msg)
     },
