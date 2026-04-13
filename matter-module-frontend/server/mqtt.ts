@@ -8,7 +8,7 @@ export async function createMqttClient(ws: WSServer) {
   // читаем конфиг
   const conf: any = await controllerConfig.readConf();
 
-  const url = conf?.mqtt?.url || "mqtt://localhost:1883";
+  const url = conf?.mqtt?.urlInDocker || "mqtt://mosquitto:1883";
   const baseTopik = conf?.mqtt?.baseTopik || "module/data";
   const username = conf?.mqtt?.user;
   const password = conf?.mqtt?.password;
