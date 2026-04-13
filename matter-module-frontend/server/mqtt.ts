@@ -27,7 +27,6 @@ export async function createMqttClient(ws: WSServer) {
   mqttClient = new MQTT({
     host: parsedUrl.hostname,
     port: Number(parsedUrl.port) || 1883,
-    topic: baseTopik,
     isDebug: true,
     username,
     password
@@ -36,6 +35,7 @@ export async function createMqttClient(ws: WSServer) {
   console.log(mqttClient)
 
   mqttClient.setMessageHandler((t, mes) => {
+    console.log("mqtt", t, mes)
     ws.broadcast(JSON.stringify({ topik: t, message: mes }));
   });
 }
