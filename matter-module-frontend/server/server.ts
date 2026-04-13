@@ -10,10 +10,11 @@ const app = next({ dev });
 const handle = app.getRequestHandler();
 
 import { ws } from '../lib/ws';
-import { MQTT } from '../lib/mqtt/mqttClient';
+import { createMqttClient } from './mqtt';
+import { controllerConfig } from './configManager';
 
 
-app.prepare().then(() => {
+app.prepare().then(async () => {
   const server = createServer((req, res) => {
     const parsedUrl = parse(req.url!, true);
     handle(req, res, parsedUrl);
@@ -22,22 +23,25 @@ app.prepare().then(() => {
   ws.connect({
     server,
     path: `/ws/${NEXT_PUBLIC_WS_PREFIX}`,
-    onMessage(msg) {
-      console.log(msg)
+    async onMessage(msg) {
+      console.log(msg);
+
+      try {
+        const data = JSON.parse(msg);
+
+        if (data.type === "command" && data.data === "restart") {
+          console.log("🔄 Restart command received");
+
+          await controllerConfig._reloadTopik(); // обновляем конфиг
+          await createMqttClient(ws);              // пересоздаём MQTT
+        }
+
+      } catch (e) {
+        console.error("WS parse error", e);
+      }
     },
-});
-const mqttClient = new MQTT({
-  host: "localhost",
-  port: 1883,
-  topic: "module/data",
-  isDebug: true,
-});
-
-mqttClient.setMessageHandler((t, mes)=>{
-  ws.broadcast(JSON.stringify({"topik": t, message: mes}))
-})
-
-
+  });
+  await createMqttClient(ws);
 
   server.listen(port, () => {
     console.log(`🚀 Ready on ${port}`);

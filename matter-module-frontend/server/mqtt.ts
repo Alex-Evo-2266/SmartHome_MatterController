@@ -1,0 +1,41 @@
+import { MQTT } from "@/lib/mqtt/mqttClient";
+import { controllerConfig } from "./configManager";
+import { WSServer } from "@/lib/ws/WSServer";
+
+let mqttClient: MQTT | null = null;
+
+export async function createMqttClient(ws: WSServer) {
+  // читаем конфиг
+  const conf: any = await controllerConfig.readConf();
+
+  const url = conf?.mqtt?.url || "mqtt://localhost:1883";
+  const baseTopik = conf?.mqtt?.baseTopik || "module/data";
+  const username = conf?.mqtt?.user;
+  const password = conf?.mqtt?.password;
+
+  // если уже есть клиент — закрываем
+  if (mqttClient) {
+    console.log("♻️ Reconnecting MQTT...");
+    mqttClient.disconnect?.(); // добавь метод если нет
+    mqttClient = null;
+  }
+
+  const parsedUrl = new URL(url);
+
+  console.log(conf?.mqtt)
+
+  mqttClient = new MQTT({
+    host: parsedUrl.hostname,
+    port: Number(parsedUrl.port) || 1883,
+    topic: baseTopik,
+    isDebug: true,
+    username,
+    password
+  });
+
+  console.log(mqttClient)
+  
+  mqttClient.setMessageHandler((t, mes) => {
+    ws.broadcast(JSON.stringify({ topik: t, message: mes }));
+  });
+}

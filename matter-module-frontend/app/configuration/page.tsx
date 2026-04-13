@@ -47,7 +47,7 @@ export default function ConfigurationPage() {
       })
       if (res.ok) setStatus("✅ Сохранено!")
       else setStatus("❌ Ошибка сохранения")
-      publish(JSON.stringify({command: "restart"}))
+      publish(JSON.stringify({type: "command", data:"restart"}))
     } catch (e) {
       console.error(e)
       setStatus("⚠️ Неверный YAML")
