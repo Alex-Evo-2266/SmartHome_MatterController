@@ -20,7 +20,10 @@ app.prepare().then(() => {
 
   ws.connect({
     server,
-    path: "/ws/module"
+    path: "/ws/module",
+    onMessage(msg) {
+      console.log(msg)
+    },
 });
 const mqttClient = new MQTT({
   host: "localhost",
@@ -28,6 +31,11 @@ const mqttClient = new MQTT({
   topic: "module/data",
   isDebug: true,
 });
+
+mqttClient.setMessageHandler((t, mes)=>{
+  ws.broadcast(JSON.stringify({"topik": t, message: mes}))
+})
+
 
 
   server.listen(port, () => {

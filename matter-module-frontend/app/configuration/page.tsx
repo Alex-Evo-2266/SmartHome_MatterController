@@ -1,10 +1,11 @@
 // app/modules/smarthome_zigbee_containers/configuration/page.tsx
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import dynamic from "next/dynamic"
 import YAML from "js-yaml"
 import { PREFIX_API } from "@/lib/envVar"
+import { useSocket } from "@/lib/hooks/webSocket.hook"
 
 // Подгружаем CodeMirror динамически (без SSR)
 const YamlEditor = dynamic(() => import("./yaml-editor"), { ssr: false, loading: () => <p>Загрузка редактора...</p> })
@@ -13,6 +14,15 @@ export default function ConfigurationPage() {
   const [yamlText, setYamlText] = useState("")
   const [loading, setLoading] = useState(true)
   const [status, setStatus] = useState("")
+
+
+  const {connectSocket, closeSocket, publish} = useSocket()
+
+  useEffect(() => {
+        console.log('MessageService connected')
+        connectSocket();
+        return () => closeSocket(); // закрывать при размонтировании
+    }, [connectSocket, closeSocket]);
 
   useEffect(() => {
     fetch(`${PREFIX_API}/api/configurate`)
@@ -37,6 +47,7 @@ export default function ConfigurationPage() {
       })
       if (res.ok) setStatus("✅ Сохранено!")
       else setStatus("❌ Ошибка сохранения")
+      publish(JSON.stringify({command: "restart"}))
     } catch (e) {
       console.error(e)
       setStatus("⚠️ Неверный YAML")
@@ -48,7 +59,7 @@ export default function ConfigurationPage() {
   return (
     <div style={{ padding: 20 }}>
       <h1>Matter Configuration</h1>
-      <div style={{ height: "70vh", border: "1px solid #ddd", marginBottom: 10, overflowY: "auto" }}>
+      <div style={{ height: "70vh", border: "1px solid #ddd", marginBottom: 10, overflowY: "auto", background: "#282c34" }}>
         <YamlEditor value={yamlText} onChange={setYamlText} />
       </div>
       <button

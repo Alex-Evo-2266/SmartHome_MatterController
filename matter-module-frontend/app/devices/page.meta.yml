@@ -1,0 +1,4 @@
+name: devices
+page_name: devices
+auth:
+  roles: ["admin"]
