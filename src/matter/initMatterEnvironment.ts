@@ -12,6 +12,9 @@ export async function initMatterEnvironment(config: Config) {
 
   console.log("[Matter] Storage path:", config.matter.storagePath ?? "./config/matter-storage");
 
+    // 👇 ВОТ ЭТО КЛЮЧ
+  environment.vars.set("net.interface", config.wifi.networkInterface ?? "wlp1s0");
+
   // 🔹 2. BLE
   if (config.ble.enabled) {
     environment.vars.set("ble", true);

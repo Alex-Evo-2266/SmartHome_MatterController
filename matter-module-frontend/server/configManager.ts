@@ -44,6 +44,7 @@ export class ControllerConfig{
                     mqtt: {
                         url: "mqtt://localhost:1883",
                         baseTopik: "matter",
+                        urlInDocker: "mqtt://mosquitto:1883",
                         user: "",
                         password: ""
                     },
@@ -60,7 +61,8 @@ export class ControllerConfig{
 
                     wifi:{
                         ssid: "",
-                        password: ""
+                        password: "",
+                        networkInterface: "wlp1s0"
                     }
                 };
 

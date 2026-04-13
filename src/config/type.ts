@@ -20,5 +20,6 @@ export interface Config {
   wifi: {
     ssid: string;
     password: string;
+    networkInterface: string
   };
 }
