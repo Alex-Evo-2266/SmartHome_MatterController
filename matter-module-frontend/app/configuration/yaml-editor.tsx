@@ -36,5 +36,5 @@ export default function YamlEditor({ value, onChange }: Props) {
     return () => view.destroy()
   }, [])
 
-  return <div ref={container} style={{ height: "100%", fontSize: 14 }} />
+  return <div ref={container} style={{ height: "100%", fontSize: 14, overflowY: "auto" }} />
 }
