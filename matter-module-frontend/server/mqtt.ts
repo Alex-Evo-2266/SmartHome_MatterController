@@ -1,6 +1,6 @@
-import { MQTT } from "@/lib/mqtt/mqttClient";
-import { controllerConfig } from "./configManager";
 import { WSServer } from "@/lib/ws/WSServer";
+import { controllerConfig } from "./configManager";
+import { MQTT } from "@/lib/mqtt/mqttClient";
 
 let mqttClient: MQTT | null = null;
 
@@ -34,7 +34,7 @@ export async function createMqttClient(ws: WSServer) {
   });
 
   console.log(mqttClient)
-  
+
   mqttClient.setMessageHandler((t, mes) => {
     ws.broadcast(JSON.stringify({ topik: t, message: mes }));
   });
