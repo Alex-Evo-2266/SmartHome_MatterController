@@ -11,6 +11,11 @@ COPY --from=deps /app/node_modules ./node_modules
 
 COPY . .
 
+RUN apt-get update && apt-get install -y \
+    bluez \
+    dbus \
+    bluetooth
+
 RUN npm run build
 
 CMD ["node", "dist/index.js"]

@@ -50,6 +50,8 @@ containers:
         - ${CONFIGURATE_DIR}/__MODULE_NAME__/config:/app/config
         - ${CONFIGURATE_DIR}/__MODULE_NAME__/matter-storage:/app/matter-storage
         - /var/run/dbus:/var/run/dbus
+        - /var/run/dbus:/var/run/dbus
+        - /var/lib/bluetooth:/var/lib/bluetooth
         - /dev:/dev
       environment:
         - TZ=Europe/Moscow

@@ -69,10 +69,6 @@ export class NodeManager {
       }
     }
 
-    if (node?.isConnected) {
-      node.disconnect();
-    }
-
     await this.matter.removeNode(NodeId(nodeId));
 
     logger.info(`Removed nodeId=${nodeId}`);
