@@ -20,6 +20,14 @@ RUN apk add --no-cache \
     bluez \
     dbus
 
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    linux-headers
+
+RUN npm install @stoprocent/noble
+
 RUN npm run build
 
 CMD ["node", "dist/index.js"]
