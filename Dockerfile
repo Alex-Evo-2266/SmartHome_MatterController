@@ -11,10 +11,14 @@ COPY --from=deps /app/node_modules ./node_modules
 
 COPY . .
 
-RUN apt-get update && apt-get install -y \
+# RUN apt-get update && apt-get install -y \
+#     bluez \
+#     dbus \
+#     bluetooth
+
+RUN apk add --no-cache \
     bluez \
-    dbus \
-    bluetooth
+    dbus
 
 RUN npm run build
 
