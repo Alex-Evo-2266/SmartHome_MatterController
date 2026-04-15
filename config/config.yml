@@ -16,3 +16,5 @@ ble:
 wifi:
   ssid: ""
   password: ""
+  networkInterface: "wlp1s0"
+  
