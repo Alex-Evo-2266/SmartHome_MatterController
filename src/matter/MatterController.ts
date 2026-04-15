@@ -145,17 +145,30 @@ export class MatterController {
     }
   }
 
-  // 🔹 Удаление устройства
   async removeNode(nodeId: NodeId) {
-    const node = await this.getNode(nodeId);
 
-    if (node?.isConnected) {
-      node.disconnect();
+    try {
+      const node = await this.getNode(nodeId);
+      // 🔹 убедиться что подключены
+      if (node && !node.isConnected) {
+        await node.connect();
+      }
+
+      // 🔹 сначала удаление с устройства
+      await this.controller.removeNode(nodeId);
+
+          // 🔹 только ПОСЛЕ этого disconnect
+      if (node?.isConnected) {
+        node.disconnect();
+      }
+
+      logger.info(`Removed nodeId=${nodeId}`);
+
+    } catch (e) {
+      logger.warn(`Decommission failed, removing locally`, e);
     }
 
-    await this.controller.removeNode(nodeId);
 
-    logger.info(`Removed nodeId=${nodeId}`);
   }
 
   // 🔹 Получить все ноды
