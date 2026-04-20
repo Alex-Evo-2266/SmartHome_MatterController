@@ -7,7 +7,7 @@ const outputPath = path.resolve(__dirname, '../config/navigation.yml');
 const authPath = path.resolve(__dirname, '../config/auth.yml');
 const CONTAINER_NAME = process.env.CONTAINER_NAME ?? "localhost";
 const PORT = process.env.PORT ?? 3000;
-const IGNORE_DIRS = ['@modals', '@private', '_components'];
+const IGNORE_DIRS = ['@modal', '@private', '_components'];
 
 function isPageFile(fileName: string) {
   return fileName === 'page.tsx' || fileName === 'page.jsx';
