@@ -3,10 +3,12 @@
 import { useSocket } from "@/lib/hooks/webSocket.hook"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {Button, TextField} from 'alex-evo-sh-ui-kit'
+import { useRouter } from "next/router"
 
 export default function Page(){ 
     
     const [message, setMessage] = useState<Record<string, unknown>>({})
+    const router = useRouter()
 
     const setMqttMessage = useCallback((data: string) => {
         const parseData = JSON.parse(data)
@@ -29,8 +31,7 @@ export default function Page(){
     return (
         <div>
             <div>
-                <TextField border placeholder="parscode"/>
-                <Button>pair</Button>
+                <Button onClick={()=>router.push("/devices/pair")}>pair</Button>
             </div>
             <table>
 

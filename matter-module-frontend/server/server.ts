@@ -10,7 +10,7 @@ const app = next({ dev });
 const handle = app.getRequestHandler();
 
 import { ws } from '../lib/ws';
-import { createMqttClient } from './mqtt';
+import { createMqttClient, getMqtt } from './mqtt';
 import { controllerConfig } from './configManager';
 
 
@@ -34,6 +34,10 @@ app.prepare().then(async () => {
 
           await controllerConfig._reloadTopik(); // обновляем конфиг
           await createMqttClient(ws);              // пересоздаём MQTT
+        }
+        else if (data.type === "command" && "topic" in data && "message" in data){
+          const mqtt = await getMqtt(ws)
+          mqtt.publish(data.topic, data.message)
         }
 
       } catch (e) {

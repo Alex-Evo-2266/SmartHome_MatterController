@@ -41,4 +41,13 @@ export async function createMqttClient(ws: WSServer) {
   });
 
   mqttClient.connect()
+
+  return mqttClient
+}
+
+export async function getMqtt(ws: WSServer){
+  if(mqttClient === null){
+    return await createMqttClient(ws)
+  }
+  return mqttClient
 }
