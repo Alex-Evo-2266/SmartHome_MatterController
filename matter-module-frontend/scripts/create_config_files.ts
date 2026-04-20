@@ -7,6 +7,7 @@ const outputPath = path.resolve(__dirname, '../config/navigation.yml');
 const authPath = path.resolve(__dirname, '../config/auth.yml');
 const CONTAINER_NAME = process.env.CONTAINER_NAME ?? "localhost";
 const PORT = process.env.PORT ?? 3000;
+const IGNORE_DIRS = ['@modals', '@private', '_components'];
 
 function isPageFile(fileName: string) {
   return fileName === 'page.tsx' || fileName === 'page.jsx';
@@ -26,6 +27,13 @@ function scanDir(dir: string): string[] {
 
   return entries.flatMap((entry) => {
     const fullPath = path.join(dir, entry.name);
+
+    if (
+      entry.isDirectory() &&
+      IGNORE_DIRS.some((ignored) => entry.name.startsWith(ignored))
+    ) {
+      return [];
+    }
 
     if (entry.isDirectory()) {
       return scanDir(fullPath);
