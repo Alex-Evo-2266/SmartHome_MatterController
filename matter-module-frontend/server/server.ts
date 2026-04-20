@@ -33,7 +33,7 @@ app.prepare().then(async () => {
           console.log("🔄 Restart command received");
 
           await controllerConfig._reloadTopik(); // обновляем конфиг
-          await createMqttClient(ws);              // пересоздаём MQTT
+          await createMqttClient(ws);            // пересоздаём MQTT
         }
         else if (data.type === "command" && "topic" in data && "message" in data){
           const mqtt = await getMqtt(ws)
