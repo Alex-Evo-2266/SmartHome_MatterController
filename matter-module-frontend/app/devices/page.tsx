@@ -2,6 +2,7 @@
 
 import { useSocket } from "@/lib/hooks/webSocket.hook"
 import { useCallback, useEffect, useMemo, useState } from "react"
+import {Button, TextField} from 'alex-evo-sh-ui-kit'
 
 export default function Page(){ 
     
@@ -27,6 +28,10 @@ export default function Page(){
     console.log(message)
     return (
         <div>
+            <div>
+                <TextField border placeholder="parscode"/>
+                <Button>pair</Button>
+            </div>
             <table>
 
             </table>
