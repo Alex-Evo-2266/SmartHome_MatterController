@@ -16,15 +16,13 @@ COPY . .
 #     dbus \
 #     bluetooth
 
-RUN apk add --no-cache \
+RUN apt-get update && apt-get install -y \
     bluez \
-    dbus
-
-RUN apk add --no-cache \
+    dbus \
     python3 \
     make \
     g++ \
-    linux-headers
+    libbluetooth-dev
 
 RUN npm install @stoprocent/noble
 
