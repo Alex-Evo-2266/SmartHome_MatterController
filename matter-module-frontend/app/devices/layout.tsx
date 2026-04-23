@@ -3,7 +3,7 @@ export default function DevicesLayout({
   modal,
 }: {
   children: React.ReactNode
-  modal: React.ReactNode
+  modal?: React.ReactNode
 }) {
   return (
     <>
