@@ -52,10 +52,14 @@ containers:
         - /var/run/dbus:/var/run/dbus
         - /var/run/dbus:/var/run/dbus
         - /var/lib/bluetooth:/var/lib/bluetooth
-        - /dev:/dev
+        - /run/dbus:/run/dbus
+        - /run/udev:/run/udev
       environment:
         - TZ=Europe/Moscow
         - NODE_ENV=production
+        - NOBLE_HCI_DEVICE_ID=0
+        - NOBLE_HCI_USE_DBUS=0
+        - NOBLE_HCI_USE_HCI=1
       devices:
         - /dev/hci0:/dev/hci0
       privileged: true
