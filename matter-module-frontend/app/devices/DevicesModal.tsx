@@ -2,7 +2,6 @@
 
 import { useSocket } from "@/lib/hooks/webSocket.hook"
 import { BaseDialog, TextField } from "alex-evo-sh-ui-kit"
-import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
 
 // export const dynamic = "force-dynamic"
