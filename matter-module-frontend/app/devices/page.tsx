@@ -3,12 +3,12 @@
 import { useSocket } from "@/lib/hooks/webSocket.hook"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { Button } from 'alex-evo-sh-ui-kit'
-import { useRouter } from "next/navigation"
+import PairModal from "./DevicesModal"
 
 export default function Page(){ 
     
     const [message, setMessage] = useState<Record<string, unknown>>({})
-    const router = useRouter()
+    const [pairModal, setPairModal] = useState<boolean>(false)
 
     const setMqttMessage = useCallback((data: string) => {
         const parseData = JSON.parse(data)
@@ -31,7 +31,11 @@ export default function Page(){
     return (
         <div>
             <div>
-                <Button onClick={()=>router.push("/devices/pair")}>pair</Button>
+            {
+                pairModal?
+                <PairModal onHide={()=>setPairModal(false)}/>:
+                <Button onClick={()=>setPairModal(true)}>pair</Button>
+            }
             </div>
             <table>
 
