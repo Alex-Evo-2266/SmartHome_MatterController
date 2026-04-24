@@ -51,3 +51,12 @@ export async function getMqtt(ws: WSServer){
   }
   return mqttClient
 }
+
+export async function mqttPublick(ws: WSServer, topic: string, message: string){
+  if(mqttClient === null){
+    mqttClient = await createMqttClient(ws)
+  }
+  const conf: any = await controllerConfig.readConf();
+  const baseTopik = conf?.mqtt?.baseTopik || "matter";
+  mqttClient.publish(`${baseTopik}/${topic}`, message)
+}
