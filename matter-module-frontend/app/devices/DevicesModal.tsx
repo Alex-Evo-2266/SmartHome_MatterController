@@ -28,6 +28,11 @@ export default function PairModal({onHide}:PairModalProps) {
         }))
     }, [publish, pairCode])
 
+    const change = (value: any, name?: string, e?: React.ChangeEvent<HTMLInputElement>)=>{
+        console.log(value, name, e)
+        setPairCode(value)
+    }
+
     return (
         <BaseDialog
             header="pair device"
@@ -37,7 +42,8 @@ export default function PairModal({onHide}:PairModalProps) {
             <TextField
                 placeholder="paircode"
                 value={pairCode}
-                onChange={(e) => setPairCode(e.target.value)}
+                border
+                onChange={change}
             />
         </BaseDialog>
     )
