@@ -37,7 +37,7 @@ app.prepare().then(async () => {
         }
         else if (data.type === "command" && "topic" in data && "message" in data){
           console.log("p0")
-          await mqttPublick(ws, data.topic, data.message)
+          await mqttPublick(ws, data.topic, JSON.stringify(data.message))
         }
 
       } catch (e) {
