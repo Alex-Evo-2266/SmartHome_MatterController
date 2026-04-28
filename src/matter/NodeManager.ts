@@ -52,6 +52,14 @@ export class NodeManager {
         capabilities: device.getCapabilities(),
       });
     }
+
+    await this.transport.publish("events/added", {
+      nodeId: nodeId.toString(),
+      pairedAt: new Date().toISOString(),
+      state: await this.getState(nodeId),
+      info: await this.getDeviceInfo(nodeId)
+    });
+
   }
 
   // 🔹 Удаление устройства
@@ -70,6 +78,11 @@ export class NodeManager {
     }
 
     await this.matter.removeNode(NodeId(nodeId));
+
+    await this.transport.publish("events/deleted", {
+      nodeId: nodeIdStr,
+      pairedAt: new Date().toISOString()
+    });
 
     logger.info(`Removed nodeId=${nodeId}`);
   }

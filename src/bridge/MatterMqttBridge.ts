@@ -52,15 +52,6 @@ export class MatterMqttBridge {
         
         await this.nodeManager.initNode(BigInt(nodeId));
 
-        const info = await this.nodeManager.getDeviceInfo(BigInt(nodeId));
-
-        await this.transport.publish("event/added", {
-          nodeId: nodeId.toString(),
-          pairedAt: new Date().toISOString(),
-          info
-        });
-
-
       }
       catch(e){
         this.publicError("error connect", String(e))
@@ -69,11 +60,6 @@ export class MatterMqttBridge {
 
     await this.transport.subscribe("delete", async (msg) => {
       if(!msg || typeof msg !== 'object' || !("nodeId" in msg) || typeof msg.nodeId !== "string")return
-
-      await this.transport.publish("event/deleted", {
-          nodeId: msg.nodeId,
-          pairedAt: new Date().toISOString()
-        });
 
       await this.nodeManager.removeNode(msg.nodeId);
     });
