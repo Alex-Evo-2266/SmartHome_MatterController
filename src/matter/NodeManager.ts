@@ -76,6 +76,14 @@ export class NodeManager {
 
   // 🔹 Подписка на ВСЕ события
   private subscribeToEvents(nodeId: bigint, node: PairedNode) {
+
+    node.events.initialized.on(() => {
+      this.transport.publish("events/node", {
+        nodeId,
+        type: "initialized",
+      });
+    });
+    
     node.events.attributeChanged.on((data: any) => {
       this.transport.publish("events/attribute", {
         nodeId,

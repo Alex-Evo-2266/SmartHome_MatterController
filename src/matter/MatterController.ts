@@ -26,6 +26,7 @@ export class MatterController {
   private controller!: CommissioningController;
   private storageService: StorageService;
   private config: Config
+  private eventCallback: (type: string, data: unknown)=>void
 
   private uniqueId!: string;
   private fabricLabel!: string;
@@ -33,6 +34,11 @@ export class MatterController {
   constructor(private environment: Environment, config: Config) {
     this.storageService = environment.get(StorageService);
     this.config = config
+    this.eventCallback = ()=>{}
+  }
+
+  setEventCallback(cb: (type: string, data: unknown)=>void){
+    this.eventCallback = cb
   }
 
   // 🔹 INIT (как CLI блок "Collect all needed data")
@@ -72,6 +78,7 @@ export class MatterController {
   // 🔹 Commission (pairingCode + BLE + WiFi)
   async commission(pairingCode: string) {
     logger.info("pairingCode", pairingCode)
+    this.eventCallback("pair", {pairingCode, step: "start"})
     const codec = ManualPairingCodeCodec.decode(pairingCode);
 
     logger.debug("Pairing data:", Diagnostic.json(codec));
@@ -112,10 +119,13 @@ export class MatterController {
 
     logger.info("Commissioning...", Diagnostic.json(options));
 
+    this.eventCallback("pair", {pairingCode, step: "start_commision"})
+    
     const nodeId = await this.controller.commissionNode(options);
 
     logger.info(`Commissioned nodeId=${nodeId}`);
 
+    this.eventCallback("pair", {pairingCode, step: "end_commision"})
     return nodeId;
   }
 
